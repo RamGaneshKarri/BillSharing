@@ -71,5 +71,7 @@ public class Main {
         // Display final expense state
         System.out.println("\nFinal Expense State: " + expense.getState());
         System.out.println("Pending Amounts: " + expense.getPendingAmounts());
+
+        scanner.close();
     }
 }
