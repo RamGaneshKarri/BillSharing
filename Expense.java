@@ -19,6 +19,10 @@ public class Expense {
         this.expenseId = expenseId;
     }
 
+    public String getExpenseId() {
+        return expenseId; // This is the getter for the expenseId
+    }
+
     public void setDescription(String description) {
         this.description = description;
     }

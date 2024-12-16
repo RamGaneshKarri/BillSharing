@@ -4,6 +4,8 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ExpenseManager manager = new ExpenseManager();
+        NotificationService notificationService = new NotificationService(); // Create an instance of
+                                                                             // NotificationService
 
         // Register users
         System.out.print("Enter the number of users to register: ");
@@ -94,9 +96,18 @@ public class Main {
         // Calculate and set splits
         expense.calculateAndSetSplits(totalAmount, group);
 
-        // Display pending amounts
+        // Display pending amounts and send notifications
         System.out.println("\nPending Amounts:");
-        System.out.println(expense.getFormattedPendingAmounts());
+        String pendingAmounts = expense.getFormattedPendingAmounts();
+        System.out.println(pendingAmounts);
+
+        // Notify users
+        for (User user : group.getMembers()) {
+            Double pendingAmount = expense.getPendingAmounts().get(user);
+            String message = "Your pending amount for the expense '" + expense.getExpenseId() + "' is: $"
+                    + String.format("%.2f", pendingAmount);
+            notificationService.notifyUser(user, message); // Send notification to the user
+        }
 
         scanner.close();
     }
