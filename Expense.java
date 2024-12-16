@@ -4,16 +4,17 @@ import java.util.Map;
 public class Expense {
     private String expenseId;
     private String description;
+    private String state;
     private String createdBy;
-    private Map<User, Double> pendingAmounts = new HashMap<>();
-    private Map<User, Double> contributions = new HashMap<>();
-    private String state = "Created"; // Initial state
+    private Map<User, Double> pendingAmounts;
+    private SplitStrategy splitStrategy;
 
-    // Default constructor
     public Expense() {
+        this.state = "Created";
+        this.pendingAmounts = new HashMap<>();
     }
 
-    // Setters
+    // Setters and Getters
     public void setExpenseId(String expenseId) {
         this.expenseId = expenseId;
     }
@@ -26,44 +27,35 @@ public class Expense {
         this.createdBy = createdBy;
     }
 
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    // Getters
-    public String getExpenseId() {
-        return expenseId;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
+    public void setSplitStrategy(SplitStrategy splitStrategy) {
+        this.splitStrategy = splitStrategy;
     }
 
     public String getState() {
         return state;
     }
 
+    public void calculateAndSetSplits(double totalAmount, ExpenseGroup group) {
+        if (splitStrategy != null) {
+            this.pendingAmounts = splitStrategy.calculateSplit(totalAmount, group);
+            this.state = "Pending";
+        } else {
+            throw new IllegalStateException("No split strategy set for the expense.");
+        }
+    }
+
     public Map<User, Double> getPendingAmounts() {
         return pendingAmounts;
     }
 
-    public void addBifurcation(User user, double amount) {
-        pendingAmounts.put(user, amount);
-    }
-
-    public void addContribution(User user, double amount) {
-        double remaining = pendingAmounts.getOrDefault(user, 0.0) - amount;
-        pendingAmounts.put(user, Math.max(0, remaining));
-        contributions.put(user, contributions.getOrDefault(user, 0.0) + amount);
-
-        // Check if expense is settled
-        boolean allSettled = pendingAmounts.values().stream().allMatch(v -> v == 0);
-        if (allSettled) {
-            setState("Settled");
+    public String getFormattedPendingAmounts() {
+        StringBuilder result = new StringBuilder();
+        for (Map.Entry<User, Double> entry : pendingAmounts.entrySet()) {
+            result.append(entry.getKey().getName())
+                    .append(": $")
+                    .append(String.format("%.2f", entry.getValue()))
+                    .append("\n");
         }
+        return result.toString();
     }
 }
